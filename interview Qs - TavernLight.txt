@@ -1,0 +1,139 @@
+Q1 - Fix or improve the implementation of the below methods
+
+local function releaseStorage(player)
+	player:setStorageValue(1000, -1)
+end
+
+
+--removed addEvent ot remove the 1 second delay and to allow more efficiant use of the releaseStorage() funciton
+function onLogout(player)
+	if player:getStorageValue(1000) == 1 then
+		releaseStorage(player)
+	end
+
+return true
+end
+
+
+
+
+
+Q2 - Fix or improve the implementation of the below method
+
+function printSmallGuildNames(memberCount)
+--this method is supposed to print names of all guilds that have less than memberCount max members
+
+    local selectGuildQuery = "SELECT name FROM guilds WHERE max_members < ?"
+    local params = { memberCount } --replace %d with ?
+    local resultId = db.storePreparedQuery(selectGuildQuery, params)
+
+    if resultId == false then
+        return false
+    end
+
+    repeat
+        local guildName = result.getString("name")
+        print(guildName)
+    until not resultId.next()
+end
+
+	--with a lack of context, this is the best method of iterating I could come up with:
+		--loop through all results, printing all guild names
+	repeat
+		local guildName = result.getString("name")
+		print(guildName)
+	until not resultId.next()
+end
+
+
+
+
+
+Q3 - Fix or improve the name and the implementation of the below method
+
+function RemovePlayerFromParty(playerId, memberName)
+	local player = Player(playerId)
+	local party = player:getParty()
+
+	--check for valid party, return false if nil
+	if party == nil
+		return false
+	end
+
+	--changed pairs to ipairs as this is more optimised. This way index which are <1 or are not numerical are ignored
+	for i, member in ipairs(party:getMembers()) do
+
+		if memberName == member:getName() then --adjusted the name check for optimisation and readibility
+			party:removeMember(Player(member))
+			return true --return true to flag the boolean, confirming the removal of the player/member
+		end
+	end
+	return false --flag the boolean to inform of the failing to remove the player/member
+end
+
+
+
+
+
+
+Q4 - Assume all method calls work fine. Fix the memory leak issue in below method
+
+void Game::addItemToPlayer(const std::string& recipient, uint16_t itemId)
+{
+	Player* player = g_game.getPlayerByName(recipient);
+
+	//if there is no player - create a player. 
+		//If this fails, delete the newly created player
+	if (!player) 
+	{
+		player = new Player(nullptr);
+		if (!IOLoginData::loadPlayerByName(player, recipient)) 
+		{
+			delete player;
+			return;
+		}
+	}
+
+	//if there is no item - create a item. 
+		//If this fails, delete the newly created item
+	Item* item = Item::CreateItem(itemId);
+	if (!item) 
+	{
+		delete item;
+		return;
+	}
+
+	g_game.internalAddItem(player->getInbox(), item, INDEX_WHEREEVER, FLAG_NOLIMIT);
+
+	if (player->isOffline()) 
+	{
+		IOLoginData::savePlayer(player);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
